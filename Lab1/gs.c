@@ -223,10 +223,14 @@ int main(int argc, char *argv[])
     //figure out real row in overall matrix
     real_row = (my_rank*num)+i;
       for (j = 0; j < num; j++) {
+        //if not aij (x to be solved)
         if (j != real_row) {
-          /*sum*/
+          //solve for x of that row for next iteration
+          local_x[
         }
       }
+      //calculate error for x, take max of error for all for's
+   
   }
   MPI_Allgatherv(local_x, num/comm_sz, MPI_FLOAT_INT,x, Xsendcount, displ, MPI_FLOAT_INT, MPI_COMM_WORLD);
   }
