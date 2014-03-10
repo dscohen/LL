@@ -1,0 +1,21 @@
+Load Balancing
+  syncing makes load balancing more difficult...only use when needed.
+  if you know how many processes/threads you need
+    check static vs dynamic (still, if overhead is not that great)
+Client Server / Repo
+  one core/process has the repo of all the tasks needed
+    distributes work to other cores as needed/they finish tasks
+Divide and Conquer
+  good for large problems (1 million array)
+  merge sort is an example
+Pipeline is good for things that can't easily be seperated (sequential in nature)
+
+
+Lecture 7: Performance
+  response time is for TASK, not program (how long does it take for a thread to complete)
+  throughput is for program (thread completions/sec)
+only use MIPS if it's same metric
+
+M(A) ET=10, CPI
+      
+M(B) ET=6, 1.2CPI

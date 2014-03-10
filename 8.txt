@@ -1,0 +1,12 @@
+Block/Cyclic
+
+cyclic is good since the array will be solved fro 0 index onward
+
+blockcyclic is good for n-body
+
+communication is at least 10x computation
+
+mpi get address
+a - b to get index of b
+
+

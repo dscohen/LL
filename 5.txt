@@ -1,0 +1,75 @@
+AVX - ompiler makes use ofthis. Effects us only with matrices and vector use in high levl code
+
+AMD blames windows 7
+  what can we do about it?
+    don't fork more than two threads ever, since there are only 2 cores
+
+supercomputers
+  not shared memory, too mant cores
+    current tech can't have dram share that much memory
+  communicate with message passing (MPI)
+  
+  reliability - mttf - mean time to failure
+  availability - if something breaks, how long until it comes back
+  service - actual maintence feasability (debug)
+  
+  reliability - ECC on all sram
+
+
+Burden is now on software
+  Not easy to transfer HPC
+    architecure difference
+    shared memory in laptop
+    distrubuted memory in HPC
+    software applications different
+
+distributed MPI
+shared open MP
+GPU - CUDA
+
+threads - share everything
+
+
+sometimes you need to slow down one thread/process to the other one, called synchronizing
+plan for communication, it needs to be minimized though
+
+Dynamic threads:
+  thread creation is epxensive because of creating tables and everything
+Static
+  If you know how much work you're program is going to use, then you can reason your code with this, else you
+    are forced to dynamic
+
+User level threads vs kernel level
+  OS sees all threads as one process: if one thread blocks, entire collection is blocked
+
+
+Nondeterminism
+  straight forward from slide
+
+race condition
+  multipple threads - need to print to screen
+    limited resource
+    never truly simultaneous, race to hardware
+critical section
+  section that accesses data that is sensitive to the race condition
+In order to deal with critical section, entrance to crit section must be sequentialized (mutual exclusion)
+  Lock it
+
+relationship between cache coherene and nondeterminism
+  depending on which one goes first determines nondeterminism
+  allows one core to update exclusively
+  which one is still random
+  only writing is looked at
+
+crit section comes from shared variable (comes from shared memory)
+  distributed doesn't
+
+Foster
+  control flow graph helps decide what to partition
+
+  communication (draw a graph as well)
+
+ agglomeration/aggregation
+  clump tasks together
+
+Example: Histogram 

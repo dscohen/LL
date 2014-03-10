@@ -1,0 +1,8 @@
+odd-even transposition sort
+	
+MPI last toucch
+first question
+  yes, everything will be in cache if p is large enough
+2. Divide up the tree
+3.
+

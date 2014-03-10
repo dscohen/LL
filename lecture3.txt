@@ -1,0 +1,4 @@
+Pipeline allows an instruction committed each cycle
+  F - D - I - E - C
+
+ET = IC * CPI * CT
