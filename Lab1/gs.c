@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
     get_input(argv[1]);
 
 
-  /* Check for convergence condition */
+    /* Check for convergence condition */
     check_matrix();
   }
 
@@ -207,32 +207,34 @@ int main(int argc, char *argv[])
     Xsendcount[i] = num/comm_sz;
   }
   if (my_rank = comm_sz-1) {
-  sendcount[comm_sz-1] += num*left_over;
-  Xsendcount[i] += left_over;
+    sendcount[comm_sz-1] += num*left_over;
+    Xsendcount[i] += left_over;
   }
   //Make stuff for gatherV
 
   //sending out matrix A partitions
   MPI_Scatterv(a, sendcount, displ, MPI_FLOAT_INT, local_A, num+left_over, MPI_FLOAT_INT, 0, MPI_COMM_WORLD);
 
+  int temp_sum;
+
   while (current_error > err) {
-  //begin work loop for jacobi
-  int local_rows = num/comm_sz;
-  int j;
-  for(i = 0; i < local_rows; i++) {
-    //figure out real row in overall matrix
-    real_row = (my_rank*num)+i;
+    //begin work loop for jacobi
+    int local_rows = num/comm_sz;
+    int j;
+    for(i = 0; i < local_rows; i++) {
+      //figure out real row in overall matrix
+      real_row = (my_rank*num)+i;
       for (j = 0; j < num; j++) {
         //if not aij (x to be solved)
         if (j != real_row) {
-          //solve for x of that row for next iteration
-          local_x[
+          temp_sum -= local_A[i*num+j]*local_x[real_row];
         }
       }
+      //solve for x of that row for next iteration
+      local_x[real_row] = (b[real_row] - temp_sum)/local_A[i*num+real_row];
       //calculate error for x, take max of error for all for's
-   
-  }
-  MPI_Allgatherv(local_x, num/comm_sz, MPI_FLOAT_INT,x, Xsendcount, displ, MPI_FLOAT_INT, MPI_COMM_WORLD);
+    }
+    MPI_Allgatherv(local_x, num/comm_sz, MPI_FLOAT_INT,x, Xsendcount, displ, MPI_FLOAT_INT, MPI_COMM_WORLD);
   }
 
 
@@ -245,7 +247,7 @@ int main(int argc, char *argv[])
   if (my_rank == 0){
     for( i = 0; i < num; i++)
       printf("%f\n",x[i]);
-  printf("total number of iterations: %d\n", nit);
+    printf("total number of iterations: %d\n", nit);
   }
   MPI_Finalize();
 
