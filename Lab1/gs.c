@@ -8,7 +8,7 @@ float **a; /* The coefficients */
 float *x;  /* The unknowns */
 float *b;  /* The constants */
 float *curr;
-float err; /* The absolute relative error */
+float err = 10; /* The absolute relative error */
 int num = 0;  /* number of unknowns */
 
 
@@ -186,8 +186,16 @@ int main(int argc, char *argv[])
   }
 
   local_x = malloc(sizeof(x));
-  //Send out X
+
+  //Send out updated globals
+  //creating pounters
+  int *n = &num;
+  float *error = &err;
+
+  MPI_Bcast(n, 1, MPI_FLOAT_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(error, num, MPI_FLOAT_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(x, num, MPI_FLOAT_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(b, num, MPI_FLOAT_INT, 0, MPI_COMM_WORLD);
 
   //getting leftover rows for last process and making room for local partition of A
   if (my_rank == comm_sz-1) {
@@ -226,11 +234,11 @@ int main(int argc, char *argv[])
       real_row = (my_rank*num)+i;
       for (j = 0; j < num; j++) {
         //if not aij (x to be solved)
-        if (j != real_row) {
-          temp_sum -= local_A[i*num+j]*local_x[real_row];
-        }
+        if (j != real_row)
+          temp_sum -= local_A[i*num+j]*x[real_row];
       }
       //solve for x of that row for next iteration
+      //see if I should change local or real x
       local_x[real_row] = (b[real_row] - temp_sum)/local_A[i*num+real_row];
       //calculate error for x, take max of error for all for's
     }
