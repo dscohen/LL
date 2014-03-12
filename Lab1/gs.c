@@ -226,7 +226,8 @@ int main(int argc, char *argv[])
   displ = (int*)  calloc(comm_sz,sizeof(int));
   for (i = 0; i < comm_sz; i++) {
     //how many data points each process is going to get
-    displ[i] += my_rank * num;
+    int displacement = i*num;
+    displ[i] += displacement;
     sendcount[i] = num*(num/comm_sz);
     Xsendcount[i] = num/comm_sz;
   }
@@ -235,12 +236,15 @@ int main(int argc, char *argv[])
   //Make stuff for gatherV
 
   //sending out matrix A partitions
-  printf("\nproc %d : sendcount = %d, displ = %d\n",my_rank, sendcount[my_rank], displ[my_rank]);
   MPI_Scatterv(new_a, sendcount, displ, MPI_FLOAT, local_A, num*(num/comm_sz)+num*left_over, MPI_FLOAT, 0, MPI_COMM_WORLD);
-  for(i = 0; i < num*num/comm_sz; i++){
-    printf("proc %d : A = %f ", my_rank,local_A[i]);
-  }
-  printf("end\n");
+
+  /*for (i = 0; i < comm_sz; i++) {*/
+    /*//how many data points each process is going to get*/
+    /*int temp_rank = my_rank;*/
+    /*displ[i] = temp_rank;*/
+  /*}*/
+
+  float *pass_x;
 
   float temp_sum;
   int plus_extra;
@@ -251,9 +255,9 @@ int main(int argc, char *argv[])
     plus_extra = left_over;
   } else {
     plus_extra = 0;
-    printf("EXTRA ROW = %d\n", plus_extra);
   }
-  while(iterationsss < 1){
+  pass_x = malloc((num/comm_sz + plus_extra) * sizeof(float));
+  while(iterationsss < 100){
     iterationsss++;
     //begin work loop for jacobi
     //
@@ -269,18 +273,24 @@ int main(int argc, char *argv[])
         if (j != real_row){
           temp_sum -= local_A[i*num+j]*x[real_row];
         }
-          printf("proc %d: tempsum = %f | Aij = %f | x = %f\n",my_rank, temp_sum, local_A[i*num+j],x[real_row]);
       }
       //solve for x of that row for next iteration
       //see if I should change local or real x
       local_x[real_row] = (b[real_row] - temp_sum)/local_A[i*num+real_row];
+      x[real_row] = local_x[real_row];
+      pass_x[i] = local_x[real_row];
       //calculate error for x, take max of error for all for's
     }
-    MPI_Allgatherv(local_x, num/comm_sz, MPI_FLOAT,x, Xsendcount, displ, MPI_FLOAT, MPI_COMM_WORLD);
-    if (my_rank == 0) {
-      for (i = 0; i < num; i++)
-        printf("%f\n",x[i]);
-    }
+    /*int k;*/
+    /*for(k = 0; k< comm_sz; k++) {*/
+      /*printf("Xsendcount ");*/
+    /*}*/
+    MPI_Allgatherv(x, num/comm_sz+plus_extra, MPI_FLOAT,pass_x, Xsendcount, displ, MPI_FLOAT, MPI_COMM_WORLD);
+    /*if (my_rank == 0) {*/
+      /*for (i = 0; i < num; i++)*/
+        /*printf("%f||||",x[i]);*/
+        /*printf("nextiter\n");*/
+    /*}*/
   }
 
 
@@ -290,15 +300,15 @@ int main(int argc, char *argv[])
   /* Writing to the stdout */
   /* Keep that same format */
 
-  if (my_rank == 0){
+  /*if (my_rank == 0){*/
     for( i = 0; i < num; i++)
       printf("%f\n",x[i]);
-    printf("total number of iterations: %d\n", nit);
-  }
+    printf("%d ::: total number of iterations: %d\n", my_rank, nit);
+  /*}*/
   //FREE EVERYTHING
   MPI_Finalize();
 
 
-  exit(0);
+  return 0;
 
 }
