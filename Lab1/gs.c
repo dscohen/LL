@@ -188,7 +188,6 @@ int main(int argc, char *argv[])
     for (i = 0; i < num; i++) {
       for (j = 0; j < num; j++) {
         new_a[i*num + j] = a[i][j];
-    printf("A[i] = %f\n", new_a[i*num +j]);
       }
     }
   }
@@ -207,7 +206,7 @@ int main(int argc, char *argv[])
     x = (float*) malloc(num * sizeof(float));
     b = (float*) malloc(num * sizeof(float));
   }
-  local_x = (float*) malloc(num* sizeof(float));
+  local_x = (float*) malloc(num * sizeof(float));
   MPI_Bcast(error, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
   MPI_Bcast(x, num, MPI_FLOAT, 0, MPI_COMM_WORLD);
   MPI_Bcast(b, num, MPI_FLOAT, 0, MPI_COMM_WORLD);
@@ -224,8 +223,10 @@ int main(int argc, char *argv[])
   sendcount = (int*)  calloc(comm_sz,sizeof(int));
   Xsendcount = (int*) malloc(comm_sz*sizeof(int));
   displ = (int*)  calloc(comm_sz,sizeof(int));
+  int *Xdispl = (int*)  calloc(comm_sz, sizeof(int));
   for (i = 0; i < comm_sz; i++) {
     //how many data points each process is going to get
+    Xdispl[i] = (num/comm_sz)*i;
     int displacement = i*num;
     displ[i] += displacement;
     sendcount[i] = num*(num/comm_sz);
@@ -238,11 +239,6 @@ int main(int argc, char *argv[])
   //sending out matrix A partitions
   MPI_Scatterv(new_a, sendcount, displ, MPI_FLOAT, local_A, num*(num/comm_sz)+num*left_over, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
-  /*for (i = 0; i < comm_sz; i++) {*/
-    /*//how many data points each process is going to get*/
-    /*int temp_rank = my_rank;*/
-    /*displ[i] = temp_rank;*/
-  /*}*/
 
   float *pass_x;
 
@@ -257,40 +253,37 @@ int main(int argc, char *argv[])
     plus_extra = 0;
   }
   pass_x = malloc((num/comm_sz + plus_extra) * sizeof(float));
-  while(iterationsss < 100){
+
+  while(iterationsss < 20){
     iterationsss++;
     //begin work loop for jacobi
     //
     int local_rows = num/comm_sz;
     int j;
     for(i = 0; i < local_rows+plus_extra; i++) {
+    temp_sum = 0;
       //figure out real row in overall matrix
       //initialize sum of row at 0 for each new row
       temp_sum = 0;
-      real_row = (my_rank*num)+i;
+      real_row = (num/comm_sz)*my_rank+i;
+      
       for (j = 0; j < num; j++) {
         //if not aij (x to be solved)
-        if (j != real_row){
-          temp_sum -= local_A[i*num+j]*x[real_row];
+        if (j != my_rank+i){
+          temp_sum = local_A[i*num+j]*x[j] + temp_sum;
         }
       }
+
       //solve for x of that row for next iteration
       //see if I should change local or real x
-      local_x[real_row] = (b[real_row] - temp_sum)/local_A[i*num+real_row];
+      local_x[real_row] = (b[real_row] - temp_sum)/local_A[i*num + my_rank+i];
       x[real_row] = local_x[real_row];
       pass_x[i] = local_x[real_row];
+
       //calculate error for x, take max of error for all for's
     }
-    /*int k;*/
-    /*for(k = 0; k< comm_sz; k++) {*/
-      /*printf("Xsendcount ");*/
-    /*}*/
-    MPI_Allgatherv(x, num/comm_sz+plus_extra, MPI_FLOAT,pass_x, Xsendcount, displ, MPI_FLOAT, MPI_COMM_WORLD);
-    /*if (my_rank == 0) {*/
-      /*for (i = 0; i < num; i++)*/
-        /*printf("%f||||",x[i]);*/
-        /*printf("nextiter\n");*/
-    /*}*/
+
+    MPI_Allgatherv(pass_x, num/comm_sz+plus_extra, MPI_FLOAT,x, Xsendcount, Xdispl, MPI_FLOAT, MPI_COMM_WORLD);
   }
 
 
@@ -300,11 +293,11 @@ int main(int argc, char *argv[])
   /* Writing to the stdout */
   /* Keep that same format */
 
-  /*if (my_rank == 0){*/
+  if (my_rank == 0){
     for( i = 0; i < num; i++)
       printf("%f\n",x[i]);
     printf("%d ::: total number of iterations: %d\n", my_rank, nit);
-  /*}*/
+  }
   //FREE EVERYTHING
   MPI_Finalize();
 
