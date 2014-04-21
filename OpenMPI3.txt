@@ -1,0 +1,20 @@
+OpenMPI for loops
+*****************
+
+#prgma omp parallel for, if you drop the parallel, openmp will only use currently active threads to ||
+  current threads
+
+  openmp runtime decides what value i is for each thread
+
+identity value for
+&& : True
+||: False
+&: 1111111
+|:0000000
+^:000000000
+
+static is cyclic, assigned before execution
+
+n/threadcount in static scheduling leads to normal scheduling
+
+create threads at outer level
