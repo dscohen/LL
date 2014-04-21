@@ -156,32 +156,32 @@ void crossover(int *b1, int *b, int *c) {
 }
 
 
-void greedy_swap(int *a, int *b) {
-  int original_d = compute_length(a);
-  int t1 = rand() % (n-1);
-  int t2 = t1+1;
-  int temp,i;
-  for (i = 0; i < logical_n; i++) {
-    b[i] = a[i];
-  }
-  for (i = 0; i < 3; i++) {
-    temp = a[t1];
-    a[t1] = a[t2];
-    a[t2] = temp;
-    if(compute_length(a) < original_d) {
-      b[t1] = a[t1];
-      b[t2] = a[t2];
-      break;
-    } else {
-      b[t2] = b[t1];
-      b[t1] = temp;
-      t1 = rand() % (n-1);
-      t2 = t1+1;
-    }
-  }
-  int k;
+/*void greedy_swap(int *a, int *b) {*/
+  /*int original_d = compute_length(a);*/
+  /*int t1 = rand() % (n-1);*/
+  /*int t2 = t1+1;*/
+  /*int temp,i;*/
+  /*for (i = 0; i < logical_n; i++) {*/
+    /*b[i] = a[i];*/
+  /*}*/
+  /*for (i = 0; i < 3; i++) {*/
+    /*temp = a[t1];*/
+    /*a[t1] = a[t2];*/
+    /*a[t2] = temp;*/
+    /*if(compute_length(a) < original_d) {*/
+      /*b[t1] = a[t1];*/
+      /*b[t2] = a[t2];*/
+      /*break;*/
+    /*} else {*/
+      /*b[t2] = b[t1];*/
+      /*b[t1] = temp;*/
+      /*t1 = rand() % (n-1);*/
+      /*t2 = t1+1;*/
+    /*}*/
+  /*}*/
+  /*int k;*/
 
-}
+/*}*/
 
 int **gene;
 int **child_gene;
@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
 
   }
   //Begin genetic algorithm action
-  int k;
+  int k,l;
   int cycle = 0;
   int jumping = -1;
   int previous = -1;
@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
           int temp,i;
           for (k = 0; k < 2; k++) {
 
-            for (i = 0; i < logical_n; i++) {
+            for (l = 0; l < logical_n; l++) {
               child_gene[i] = gene[i];
             }
             temp = gene[i][t1];
@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
           t2 = t1+1;
           for (k = 0; k < 2; k++) {
 
-            for (i = 0; i < logical_n; i++) {
+            for (l = 0; l < logical_n; l++) {
               gene[i] = child_gene[i];
             }
             temp = child_gene[i][t1];
@@ -302,16 +302,15 @@ int main(int argc, char *argv[])
           }
         }
       }
-    }
-    /////with two champs found, create and breed child into next generation at random spot.
-    temp = (rand()%START);
     if (!cycle) {
       crossover(gene[local_parent1], gene[local_parent2], child_gene[local_parent2]);
     } else {
       crossover(child_gene[local_parent1], child_gene[local_parent2], gene[local_parent2]);
     }
+    }
+    /////with two champs found, create and breed child into next generation at random spot.
     e_index++;
-    if ((abs(previous - (temp = compute_length(elite[0]))) < 1) || (jumping == previous)) {
+    if (((abs(previous - (temp = compute_length(elite[0]))) < 1) || (jumping == previous)) && (iter > 3)) {
       printf("final solution = %d\n", temp);
       for (i = 0; i < n; i++) {
         printf("%d ", elite[0][i]);
