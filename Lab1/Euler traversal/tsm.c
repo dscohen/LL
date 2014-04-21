@@ -187,7 +187,7 @@ int **gene;
 int **child_gene;
 int main(int argc, char *argv[])
 {
-  int i,j,r,hold, thread_count, original_d, t1, t2;
+  int i,j,r,hold, thread_count, original_d, t1, t2, rand_tour;
   int **elite;
   int *random;
   int not_converged = TRUE;
@@ -206,9 +206,10 @@ int main(int argc, char *argv[])
     child_gene[i] = (int*)malloc(START * sizeof(int*));
     for (j = 0; j < n; j++) {
       rand_tour = rand()%n;
-      while (used[rand_tour] = -1) {
+      while (random[rand_tour] = -1) {
         rand_tour = rand()%n;
       }
+      random[rand_tour] = -1;
       gene[i][j] = rand_tour;
       child_gene[i][j] = rand_tour;
     }
@@ -216,14 +217,14 @@ int main(int argc, char *argv[])
     child_gene[i][n] = n;
     //This method introduces a slight bias, but still performs within error bounds
     //populates pop1 with randoms
-    for (j = 0; j < n; j++) {
-      r = rand() % n;
-      hold = gene[i][r];
-      gene[i][r] = gene[i][j];
-      gene[i][j] = hold;
-      child_gene[i][j] = hold;
-      child_gene[i][r] = gene[i][r];
-    }
+/*    for (j = 0; j < n; j++) {*/
+      /*r = rand() % n;*/
+      /*hold = gene[i][r];*/
+      /*gene[i][r] = gene[i][j];*/
+      /*gene[i][j] = hold;*/
+      /*child_gene[i][j] = hold;*/
+      /*child_gene[i][r] = gene[i][r];*/
+    /*}*/
 
   }
   //Begin genetic algorithm action
