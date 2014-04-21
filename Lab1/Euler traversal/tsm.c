@@ -189,11 +189,13 @@ int main(int argc, char *argv[])
 {
   int i,j,r,hold, thread_count, original_d, t1, t2;
   int **elite;
+  int *random;
   int not_converged = TRUE;
   /*thread_count = strtol(argv[1], NULL, 10);*/
   get_matrix(argv[1]);
   //create population 1 and 2
   elite = (int**)malloc(10 * sizeof(int*));
+  random = (int*)malloc(n*sizeof(int*));
   for (i = 0; i < 10; i++) {
     elite[i] = (int*)malloc(logical_n*sizeof(int*));
   }
@@ -202,10 +204,16 @@ int main(int argc, char *argv[])
   for (i = 0; i < START; i++) {
     gene[i] = (int*)malloc(logical_n*sizeof(int*));
     child_gene[i] = (int*)malloc(START * sizeof(int*));
-    for (j = 0; j < logical_n; j++) {
-      gene[i][j] = j;
-      child_gene[i][j] = j;
+    for (j = 0; j < n; j++) {
+      rand_tour = rand()%n;
+      while (used[rand_tour] = -1) {
+        rand_tour = rand()%n;
+      }
+      gene[i][j] = rand_tour;
+      child_gene[i][j] = rand_tour;
     }
+    gene[i][n] = n;
+    child_gene[i][n] = n;
     //This method introduces a slight bias, but still performs within error bounds
     //populates pop1 with randoms
     for (j = 0; j < n; j++) {
@@ -231,19 +239,18 @@ int main(int argc, char *argv[])
     int local_parent1, local_parent2;
     int max1, max2, temp, best_max = 100000;
     //gene is parent when cycle is even
-    for (j = 20; j <= START; j+=20) {
+    for (j = 10; j <= START; j+=10) {
       max1 = 100000; max2 = 100000;
       if(!cycle) {
-        for (i = j-20; i < j; i++) {
+        for (i = j-10; i < j; i++) {
           temp = compute_length(gene[i]);
           if (temp < max1) {
             local_parent1 = i;
             max1 = temp;
             if (temp < best_max) {
-              e_index = 0;
               best_max = temp;
               for (k = 0; k <logical_n; k++) {
-                elite[e_index][k] = gene[i][k];
+                elite[0][k] = gene[i][k];
               }
             }
             continue;
@@ -269,16 +276,15 @@ int main(int argc, char *argv[])
         }
       } else {
         //child_gene is parent on odd cycles;
-        for (i = j-20; i < j; i++) {
+        for (i = j-10; i < j; i++) {
           temp = compute_length(child_gene[i]);
           if (temp < max1) {
             local_parent1 = i;
             max1 = temp;
             if (temp < best_max) {
-              e_index = 0;
               best_max = temp;
               for (k = 0; k <logical_n; k++) {
-                elite[e_index][k] = child_gene[i][k];
+                elite[0][k] = child_gene[i][k];
               }
             }
             continue;
