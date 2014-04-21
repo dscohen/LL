@@ -1,0 +1,12 @@
+pragma only applies to the next block
+
+still hard because of coherence and race conditions
+  cache coherence at the level right above smallest shared
+  layer of memory
+
+coherence almost always is on chip
+
+1 cpu update a block at a time, invalidates other writes,
+  doesn't influence block updates
+
+openmp doesn't mean all threads will start at around the same time.
